@@ -1,61 +1,90 @@
-# 🚌 Proyecto 03 – Data Mining 2025  
+# NYC-Taxi-Analytics-Pipeline
 ### Universidad San Francisco de Quito  
 **Curso:** Data Mining  
-**Estudiante:** Joel Cuascota
+**Estudiante:** Joel Cuascota  
 **Fecha:** Octubre 2025  
 
 ---
 
-## 🧠 Resumen
-Este proyecto replica un flujo completo de *Data Engineering + Analytics* sobre el dataset **NYC TLC Trips (Yellow & Green, 2015–2025)**.  
-La infraestructura se levanta con **Docker Compose** (servicio único `spark-notebook`) y el destino analítico es **Snowflake**, organizado en dos esquemas:
+## Resumen Ejecutivo
+Este proyecto implementa un pipeline completo de ingeniería de datos y análisis sobre el dataset NYC TLC Trips (Yellow & Green, 2015–2025). La infraestructura se despliega mediante Docker Compose con un servicio único `spark-notebook` y utiliza Snowflake como destino analítico, organizando los datos en dos esquemas principales:
 
-- **RAW:** aterrizaje espejo de Parquet con metadatos de ingesta.  
-- **ANALYTICS:** tabla unificada `analytics.obt_trips` (modelo *One Big Table*, OBT).
+- **RAW:** Capa de aterrizaje espejo de archivos Parquet con metadatos de ingesta
+- **ANALYTICS:** Tabla unificada `analytics.obt_trips` siguiendo el modelo One Big Table (OBT)
 
-Se procesan, validan y analizan los datos mediante notebooks en Jupyter/Spark o Snowpark Python.
+El procesamiento, validación y análisis de datos se realiza mediante notebooks de Jupyter utilizando Spark y Snowpark Python.
 
 ---
 
-## 🎯 Objetivos de aprendizaje
-- Operar Spark en Jupyter para ingesta masiva y transformación ligera de Parquet.  
-- Diseñar un aterrizaje RAW y una OBT desnormalizada para analítica directa.  
-- Practicar un modelo alternativo al dimensional (One Big Table).  
-- Gestionar seguridad y reproducibilidad con Docker y variables de ambiente.  
-- Implementar controles de calidad, idempotencia y auditoría de cargas.
+## Objetivos del Proyecto
+- Implementar operaciones de Spark en Jupyter para ingesta masiva y transformación de archivos Parquet
+- Diseñar una arquitectura de datos con capa RAW y modelo OBT desnormalizado para análisis directo
+- Aplicar un enfoque alternativo al modelado dimensional tradicional (One Big Table)
+- Gestionar seguridad y reproducibilidad mediante containerización Docker y variables de entorno
+- Implementar controles de calidad de datos, procesos idempotentes y auditoría de cargas de datos
 
-
-## 🏗️ Arquitectura general
+## Arquitectura del Sistema
 
 ```text
-Parquet (NYC TLC 2015–2025)
+Fuente: Parquet Files (NYC TLC 2015–2025)
    │
    ▼
-Spark (Jupyter Notebook en contenedor)
+Capa de Procesamiento: Apache Spark (Jupyter Notebook en contenedor Docker)
    │
    ├── Ingesta RAW → Snowflake.RAW
-   ├── Enriquecimiento/Unificación (zones, catálogos)
-   ├── Construcción OBT (derivadas + metadatos)
-   └── Validaciones y Análisis (Snowpark)
+   ├── Enriquecimiento/Unificación (zones, catálogos de referencia)
+   ├── Construcción OBT (variables derivadas + metadatos)
+   └── Validaciones y Análisis (Snowpark Python)
          ▼
-         Snowflake.ANALYTICS.OBT_TRIPS
+Destino: Snowflake.ANALYTICS.OBT_TRIPS
 ```
 
-## 🧰 Herramientas clave
+## Herramientas y Tecnologías Utilizadas
 
-- **Docker + Docker Compose**  
-- **Jupyter + PySpark**  
-- **Snowflake (con Snowpark Python)**  
-- **Pandas + Matplotlib** para visualizaciones  
+### Infraestructura y Containerización
+- **Docker**: Containerización de servicios y dependencias
+- **Docker Compose**: Orquestación de servicios multi-contenedor
+- **Jupyter PySpark Notebook**: Entorno de desarrollo interactivo con Apache Spark preconfigurado
+
+### Plataformas de Datos
+- **Apache Spark**: Motor de procesamiento distribuido para big data
+- **Snowflake Cloud Data Platform**: Data warehouse en la nube para almacenamiento y análisis
+- **Snowpark Python**: SDK de Snowflake para desarrollo nativo en Python
+
+### Lenguajes de Programación y Librerías
+- **Python 3.11**: Lenguaje principal de desarrollo
+- **PySpark**: API de Python para Apache Spark
+- **Pandas**: Manipulación y análisis de estructuras de datos
+- **NumPy**: Computación científica y operaciones con arrays
+- **Requests**: Cliente HTTP para descargas de archivos
+- **PyArrow**: Procesamiento de datos columnares y formato Parquet
+
+### Conectividad y Seguridad
+- **Snowflake Connector Python**: Conector oficial para conexiones a Snowflake
+- **Boto3**: SDK de AWS para integración con servicios de Amazon (S3, etc.)
+- **Cryptography**: Librerías criptográficas para conexiones seguras
+- **PyJWT**: Manejo de JSON Web Tokens
+- **PyOpenSSL**: Interfaz Python para OpenSSL
+
+### Gestión de Configuración y Datos
+- **Environment Variables (.env)**: Gestión segura de credenciales y configuración
+- **Parquet**: Formato de almacenamiento columnar optimizado
+- **CSV**: Formato de intercambio para resultados y evidencias
+- **Pathlib**: Manipulación de rutas de archivos del sistema
+- **Tempfile**: Gestión de archivos temporales durante el procesamiento
+
+### Herramientas de Calidad y Auditoría
+- **Hash Functions**: Generación de identificadores únicos para idempotencia
+- **Data Validation**: Controles de calidad, rangos y coherencia de datos
+- **Logging**: Registro detallado de operaciones y auditoría de procesos  
 
 ---
 
-## ⚙️ Variables de ambiente (`.env`)
+## Configuración de Variables de Entorno
 
-Todas las credenciales y parámetros se manejan mediante un archivo `.env`  
-*(sin credenciales reales en GitHub)*.
+Todas las credenciales y parámetros del sistema se gestionan mediante un archivo `.env` para garantizar la seguridad y separación de configuración del código fuente.
 
-### Ejemplo de `.env.example`
+### Plantilla de Configuración (.env.example)
 ```bash
 SNOWFLAKE_ACCOUNT=xxxxxx
 SNOWFLAKE_USER=xxxxx
@@ -69,10 +98,10 @@ PARQUET_PATH=/data/parquet
 RUN_ID=P3_$(date +%Y%m%d_%H%M)
 ```
 
-## 🧩 Notebooks y propósito
+## Estructura de Notebooks y Funcionalidades
 
-| Notebook | Propósito principal |
-|-----------|--------------------|
+| Notebook | Propósito Principal |
+|----------|---------------------|
 | **01_ingesta_parquet_raw.ipynb** | Lee Parquet (Yellow/Green) 2015–2025 y carga a RAW. |
 | **02_enriquecimiento_y_unificacion.ipynb** | Integra catálogos (zones, vendor, rate, payment). |
 | **03_construccion_obt.ipynb** | Construye `analytics.obt_trips` (derivadas, idempotencia). |
@@ -80,58 +109,52 @@ RUN_ID=P3_$(date +%Y%m%d_%H%M)
 | **05_data_analysis.ipynb** | Responde 20 preguntas de negocio con `analytics.obt_trips`. |
 
 
-## 🗓️ Cobertura procesada
+## Cobertura de Datos Procesados
 
-La siguiente matriz resume la cobertura temporal y el estado de procesamiento por servicio.  
-Los resultados completos se documentan en el archivo CSV de evidencia:
+La siguiente matriz resume la cobertura temporal y el estado de procesamiento por servicio de taxi (Yellow/Green). Los resultados completos se documentan en el archivo CSV de evidencia:
 
-📄 **`evidence/matriz_cobertura.csv`**
+**Archivo de referencia:** `evidence/matriz_cobertura.csv`
 
-## 📦 Diseño de esquemas
+## Diseño de Esquemas de Datos
 
-### 🗂️ RAW
-- **Grano:** viaje original.  
-- **Metadatos:** `_run_id`, `_ingested_at_utc`, `service`, `year`, `month`.  
-- **Uso:** staging y auditoría.  
+### Esquema RAW
+- **Granularidad:** Registro individual por viaje original
+- **Metadatos de control:** `_run_id`, `_ingested_at_utc`, `service`, `year`, `month`
+- **Propósito:** Capa de staging y auditoría de datos crudos
 
----
-
-### 🧮 ANALYTICS.OBT_TRIPS (One Big Table)
-- **Grano:** 1 fila = 1 viaje.  
-- **Derivadas:**
-  - `trip_duration_min = datediff('minute', pickup, dropoff)`  
-  - `avg_speed_mph = distance / (duration/60)`  
-  - `tip_pct = tip_amount / fare_amount`  
-- **Metadatos:** `run_id`, `built_at_utc`, `source_service`, `source_year`, `source_month`.  
-- **Idempotencia:** control mediante `TRIP_ID = HASH(...)`.
+### Esquema ANALYTICS.OBT_TRIPS (One Big Table)
+- **Granularidad:** Una fila equivale a un viaje completo  
+- **Variables Derivadas:**
+  - `trip_duration_min`: Duración calculada en minutos usando `datediff('minute', pickup, dropoff)`
+  - `avg_speed_mph`: Velocidad promedio en mph calculada como `distance / (duration/60)`
+  - `tip_pct`: Porcentaje de propina calculado como `tip_amount / fare_amount`
+- **Metadatos de Control:** `run_id`, `built_at_utc`, `source_service`, `source_year`, `source_month`
+- **Control de Idempotencia:** Gestión mediante identificador único `TRIP_ID = HASH(campos_clave)`
 
 ---
 
-## ✅ Calidad y auditoría
+## Controles de Calidad y Auditoría
 
-**Validaciones ejecutadas:**
-- Nulos en campos esenciales (`pickup`, `dropoff`, `location`, `payment`) → ✅ 0 nulos.  
-- **Rangos lógicos:**
-  - Duración: 0–48h  
-  - Distancia: 0–150mi  
-  - Velocidad ≤ 100 mph → ✅ sin fuera de rango.  
-- **Coherencia temporal:** `dropoff ≥ pickup` → ✅.  
-- **Conteos por servicio/mes:** reproducen los conteos originales (12.7M yellow, 1.5M green).  
+**Validaciones Implementadas:**
+- **Validación de completitud:** Verificación de campos esenciales (`pickup`, `dropoff`, `location`, `payment`) - Resultado: 0% valores nulos
+- **Validación de rangos lógicos:**
+  - Duración de viaje: 0–48 horas
+  - Distancia de viaje: 0–150 millas
+  - Velocidad promedio: ≤ 100 mph - Resultado: sin registros fuera de rango
+- **Coherencia temporal:** Validación `dropoff_datetime ≥ pickup_datetime` - Resultado: 100% consistencia
+- **Integridad de volúmenes:** Conteos por servicio/mes reproducen exitosamente los conteos originales (12.7M registros Yellow, 1.5M registros Green)
 
-**Auditoría:**  
-Archivo `validacion_obt_quality_summary.csv` con métricas por servicio.
-
----
-
-## 🧪 Análisis de resultados (2015–2025): síntesis
-
-**Nota sobre visualización:**  
-El notebook imprime en pantalla solo las primeras 20 filas (`head(20)`), por lo que muchos ejemplos muestran meses iniciales de 2015.  
-Los resultados completos 2015–2025 están guardados como CSV en `evidence/analysis_05/`.
+**Documentación de Auditoría:**  
+Archivo `validacion_obt_quality_summary.csv` contiene métricas detalladas de calidad por servicio.
 
 ---
 
-### 🔍 Hallazgos clave por tema
+## Análisis de Resultados (2015–2025): Síntesis Ejecutiva
+
+**Nota metodológica:**  
+Los notebooks muestran en pantalla únicamente las primeras 20 filas de cada consulta para optimizar la visualización. Los datasets completos correspondientes al período 2015–2025 se almacenan como archivos CSV en el directorio `evidence/analysis_05/`.
+
+### Hallazgos Principales por Categoría de Análisis
 
 #### (a) & (b) Zonas top de pickup/dropoff  
 **Archivos:** `a_top10_pickup_por_mes.csv`, `b_top10_dropoff_por_mes.csv`  
@@ -256,21 +279,23 @@ Los días etiquetados como **ALTO_CONG** presentan `AVG_TOTAL` mayor que los dí
 
 ---
 
-## 🧱 Ejecución paso a paso
+## Guía de Ejecución
 
-1. Clonar el repositorio y crear el archivo `.env` (basado en `.env.example`).  
-2. Levantar el entorno con Docker Compose:  
+1. **Configuración inicial:** Clonar el repositorio y crear el archivo `.env` basado en la plantilla `.env.example`
+2. **Despliegue de infraestructura:** Levantar el entorno con Docker Compose:
    ```bash
    docker compose up -d
    ```
-3. Acceder a Jupyter: http://localhost:8888
-4. Ejecutar los notebooks en orden: 01 → 05
-5. Revisar los outputs en las carpetas: evidence/
+3. **Acceso al entorno de desarrollo:** Conectar a Jupyter Lab via http://localhost:8888
+4. **Ejecución secuencial:** Ejecutar los notebooks en orden numérico: 01 → 02 → 03 → 04 → 05
+5. **Revisión de resultados:** Examinar los archivos de salida en el directorio `evidence/`
 
 
-## 🗂️ Carpeta de evidencias (`/evidence`)
+## Documentación de Evidencias
 
-| Evidencia               | Descripción esperada                                               |
+### Directorio `/evidence`
+
+| Archivo de Evidencia    | Descripción del Contenido                                          |
 |-------------------------|-------------------------------------------------------------------|
 | `docker_running.png`     | `docker ps` mostrando contenedor `spark-notebook` activo.        |
 | `jupyter_home.png`       | Vista de JupyterLab con notebooks visibles.                      |
@@ -282,22 +307,39 @@ Los días etiquetados como **ALTO_CONG** presentan `AVG_TOTAL` mayor que los dí
 | `snowflake_console.png`  | Vista de las tablas RAW y OBT en Snowflake.                      |
 
 
-## 🧾 Checklist de aceptación
+## Criterios de Aceptación del Proyecto
 
-- Docker Compose levanta Spark + Jupyter
-- Variables desde `.env`
-- Carga completa 2015–2025 (al menos validado 2015–01)
-- `analytics.obt_trips` creada con derivadas y metadatos
-- Idempotencia verificada (reingesta 2015–01)
-- Validaciones completas (rangos, nulos, coherencia)
-- 20 preguntas analizadas
-- README con pasos y evidencias
+**Infraestructura y Configuración:**
+- Docker Compose despliega exitosamente los servicios Spark + Jupyter
+- Variables de entorno cargadas correctamente desde archivo `.env`
+- Acceso funcional a Jupyter Lab y Spark UI
+
+**Procesamiento de Datos:**
+- Carga completa del dataset 2015–2025 (validación mínima en 2015-01)
+- Tabla `analytics.obt_trips` creada con variables derivadas y metadatos completos
+- Procesos idempotentes verificados mediante reingesta de datos de prueba
+
+**Calidad y Análisis:**
+- Validaciones completas implementadas (rangos, valores nulos, coherencia temporal)
+- 20 preguntas de negocio analizadas y documentadas
+- Documentación completa con guías de ejecución y evidencias
 
 ---
 
-## 📈 Conclusiones
+## Conclusiones del Proyecto
 
-- Se logró una OBT robusta, idempotente y sin duplicados.
-- Los resultados analíticos confirman patrones históricos de tráfico en NYC.
-- Snowpark resultó más simple y eficiente que Spark puro para análisis SQL.
-- Infraestructura reproducible vía Docker y variables de entorno.
+**Arquitectura de Datos:**
+- Implementación exitosa de una tabla OBT robusta, idempotente y libre de duplicados
+- Diseño escalable con separación clara entre capas RAW y ANALYTICS
+
+**Resultados Analíticos:**
+- Los hallazgos confirman patrones históricos conocidos del tráfico de taxis en NYC
+- Identificación de tendencias temporales, geográficas y de comportamiento de usuarios
+
+**Tecnología y Herramientas:**
+- Snowpark Python demostró mayor simplicidad y eficiencia comparado con Spark tradicional para operaciones analíticas
+- Infraestructura completamente reproducible mediante containerización Docker y gestión de variables de entorno
+
+**Calidad y Governance:**
+- Implementación exitosa de controles de calidad de datos y procesos de auditoría
+- Documentación exhaustiva que facilita el mantenimiento y extensión del sistema
